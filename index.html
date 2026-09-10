@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Générateur de séquences visuelles</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
+
+<style>
+:root{
+  --violet:#6d2c91;--violet2:#8a52a9;--bg:#f4f4f7;--card:#fff;--ink:#292a30;--muted:#6d6f78;--line:#dedee6;
+  --soft:#f8f6fa;--danger:#b94a4a;--green:#2d8a57;--blue:#3d74b8;--sand:#fff8e7;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}.app{max-width:1240px;margin:auto;padding-bottom:46px}
+.header{padding:26px 20px 22px;background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff;text-align:center}
+.header .eyebrow{text-transform:uppercase;letter-spacing:1.8px;font-size:11px;opacity:.82}.header h1{margin:5px 0 6px;font-size:29px}.header p{max-width:760px;margin:0 auto;font-size:14px;line-height:1.45;opacity:.95}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border-bottom:1px solid var(--line);padding:12px 16px;position:sticky;top:0;z-index:50}.spacer{flex:1}
+.btn{border:0;border-radius:9px;padding:9px 12px;cursor:pointer;font-weight:650}.btn.primary{background:var(--violet);color:#fff}.btn.secondary{background:#ececf2;color:#333}.btn.green{background:var(--green);color:#fff}.btn.blue{background:var(--blue);color:#fff}.btn.danger{background:var(--danger);color:#fff}.btn.ghost{background:#fff;border:1px solid var(--line);color:#444}.btn.small{font-size:12px;padding:6px 9px}
+.content{padding:18px}.topgrid{display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start}.card{background:#fff;border:1px solid #ececf1;border-radius:16px;padding:17px;box-shadow:0 2px 9px rgba(0,0,0,.05);margin-bottom:16px}.card h2,.card h3{margin:0 0 12px}.card h2{font-size:19px}.card h3{font-size:15px}.subtle{font-size:12.5px;color:var(--muted);line-height:1.45}
+.field{margin-bottom:12px}label{display:block;font-size:12.5px;font-weight:700;margin-bottom:5px;color:#42434b}input[type=text],select,textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;background:#fcfcfd;color:#2f3035}input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(109,44,145,.08)}
+.segment{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.segbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;font-weight:700;font-size:13px}.segbtn.active{background:#f0e7f5;border-color:var(--violet);color:#5c2479}
+.toggle-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;border-top:1px solid #eee;padding:10px 0}.toggle-row:first-child{border-top:0}.toggle{width:42px;height:23px;appearance:none;background:#cfcfd7;border-radius:999px;position:relative;cursor:pointer;transition:.2s}.toggle:checked{background:var(--violet)}.toggle:before{content:"";position:absolute;width:17px;height:17px;border-radius:50%;background:white;left:3px;top:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}.toggle:checked:before{transform:translateX(19px)}
+.info{padding:10px 11px;border-radius:10px;background:#faf7fc;border-left:4px solid var(--violet);font-size:12.5px;line-height:1.45;color:#555}.warn{background:var(--sand);border-left-color:#c58a27}
+.saved-list{display:flex;flex-direction:column;gap:7px;max-height:250px;overflow:auto}.saved-item{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff;display:flex;gap:8px;align-items:center}.saved-main{flex:1;min-width:0;cursor:pointer}.saved-title{font-weight:750;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.saved-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.editor-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}.quickbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.quick{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 9px;font-size:11.5px;cursor:pointer}.quick:hover{border-color:var(--violet)}
+.items{display:flex;flex-direction:column;gap:9px}.step{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff;display:grid;grid-template-columns:44px 62px 1fr auto;gap:9px;align-items:center}.step.dragging{opacity:.45}.draghandle{font-size:21px;color:#999;text-align:center;cursor:grab;user-select:none}.stepnum{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#efe5f4;color:#5e247d;font-weight:850}
+.step-main{min-width:0}.step-title{display:flex;gap:7px;align-items:center}.step-title input{font-weight:700}.step-tools{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.visual-thumb{width:54px;height:54px;border-radius:9px;border:1px solid var(--line);background:#fafafa;object-fit:contain;display:none}.visual-thumb.show{display:block}.step-side{display:flex;align-items:center;gap:7px}.move{display:flex;flex-direction:column;gap:4px}
+.preview-wrap{background:#fff}.preview-title{text-align:center;margin-bottom:14px}.preview-title h2{font-size:23px;margin:0 0 4px}.preview-title .child{font-size:13px;color:var(--muted)}
+.sequence.vertical{display:flex;flex-direction:column;gap:11px;max-width:680px;margin:auto}.sequence.horizontal{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}.sequence.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.seq-card{position:relative;border:2px solid #e3d7e9;border-radius:15px;padding:12px;background:#fff;display:grid;grid-template-columns:54px 92px 1fr;gap:12px;align-items:center;min-height:112px}.horizontal .seq-card{display:flex;flex-direction:column;text-align:center;min-height:210px}.cards .seq-card{display:flex;flex-direction:column;text-align:center;min-height:250px;border-style:dashed}
+.seq-num{width:43px;height:43px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#efe5f4;color:#5e247d;font-weight:900;font-size:18px}.seq-pic{width:86px;height:86px;border-radius:11px;object-fit:contain;background:#fafafa}.seq-pic.placeholder{display:flex;align-items:center;justify-content:center;font-size:32px;color:#aaa}.seq-label{font-size:21px;font-weight:800;line-height:1.2}.horizontal .seq-label,.cards .seq-label{font-size:18px}.check-box{width:28px;height:28px;border:3px solid #777;border-radius:6px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;cursor:pointer;user-select:none;margin-top:7px}.check-box.checked{background:#e6f5eb;border-color:#2d8a57;color:#2d8a57}.complete-card{border:2px solid #b9dec5;background:#f4fbf6;border-radius:15px;padding:18px;text-align:center;font-size:25px;font-weight:900;color:#2d7f51}.horizontal .complete-card,.cards .complete-card{min-height:150px;display:flex;align-items:center;justify-content:center}
+.arasaac-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:100}.arasaac-modal.show{display:flex}.modal-card{background:#fff;border-radius:16px;max-width:820px;width:94%;max-height:88vh;overflow:auto;padding:16px}.modal-head{display:flex;gap:8px;align-items:center}.modal-head input{flex:1}.results{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px}.pic-result{border:1px solid var(--line);border-radius:9px;padding:6px;background:#fff;cursor:pointer;text-align:center}.pic-result:hover{border-color:var(--violet)}.pic-result img{width:100%;aspect-ratio:1;object-fit:contain}.pic-result span{display:block;font-size:10px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pic-result .source-badge{font-size:9px;font-weight:800;letter-spacing:.2px;color:#6d2c91;margin-top:3px}.source-tabs{display:flex;gap:7px;flex-wrap:wrap}.source-btn{border:1px solid var(--line);background:#fff;color:#555;border-radius:999px;padding:7px 10px;font-size:11.5px;font-weight:750;cursor:pointer}.source-btn.active{border-color:var(--violet);background:#f1e8f6;color:#5e247d}.loading{text-align:center;color:#777;padding:20px}.results-heading{grid-column:1/-1;font-size:12px;font-weight:850;color:#555;padding:5px 2px 0;border-bottom:1px solid #eee}
+
+.template-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:110}
+.template-modal.show{display:flex}
+.template-card{background:#fff;border-radius:16px;max-width:880px;width:94%;max-height:88vh;overflow:auto;padding:18px}
+.template-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.template-head h2{margin:0 0 4px}
+.template-section{margin-top:18px}
+.template-section h3{margin:0 0 9px;font-size:15px;color:#4c4d55}
+.template-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.template-choice{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;text-align:left;cursor:pointer;min-height:78px}
+.template-choice:hover{border-color:var(--violet);background:#faf7fc}
+.template-choice strong{display:block;font-size:13px;margin-bottom:4px;color:#3a3040}
+.template-choice span{display:block;font-size:11.5px;color:var(--muted);line-height:1.35}
+@media(max-width:720px){.template-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.template-grid{grid-template-columns:1fr}}
+
+.help h3{margin-top:16px}.help p,.help li{font-size:13px;line-height:1.5;color:#555}.help ul{margin:7px 0 0 18px}.credit{font-size:9px;color:#666;text-align:center;margin-top:12px}.footer{text-align:center;font-size:11px;color:#777;padding:12px}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#292a30;color:#fff;border-radius:999px;padding:9px 15px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;z-index:200}.toast.show{opacity:1}.hidden{display:none!important}
+@media(max-width:950px){.topgrid{grid-template-columns:1fr}.results{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:650px){.content{padding:10px}.segment{grid-template-columns:1fr}.step{grid-template-columns:34px 48px 1fr}.step-side{grid-column:1/-1;justify-content:flex-end}.sequence.cards{grid-template-columns:1fr}.sequence.horizontal{grid-template-columns:1fr 1fr}.results{grid-template-columns:repeat(3,1fr)}}
+@media print{
+ @page{size:A4 portrait;margin:9mm}
+ body{background:white}.toolbar,.setup,.editor,.saved,.help,.no-print,.toast,.arasaac-modal{display:none!important}.content{padding:0}.topgrid{display:block}.preview-wrap{box-shadow:none;border:0;padding:0}.header{display:none}.footer{font-size:8pt;padding:3mm}.seq-card{break-inside:avoid}.sequence.cards{grid-template-columns:repeat(2,1fr)}.cards .seq-card{min-height:115mm}.check-box{cursor:default}.credit{font-size:7pt}
+ body.print-horizontal{@page{size:A4 landscape;margin:8mm}} body.print-horizontal .sequence.horizontal{grid-template-columns:repeat(var(--print-cols,5),1fr)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="eyebrow">Support éducatif visuel</div>
+    <h1>Générateur de séquences visuelles</h1>
+    <p>Décomposer une activité en étapes simples pour rendre l'action plus compréhensible et soutenir l'autonomie.</p>
+  </header>
+
+  <div class="toolbar no-print">
+    <button class="btn primary" onclick="newSequence()">+ Nouvelle séquence</button>
+    <button class="btn green" onclick="saveSequence()">Enregistrer</button>
+    <button class="btn secondary" onclick="duplicateSequence()">Dupliquer</button>
+    <button class="btn blue" onclick="printSequence()">Imprimer / PDF</button>
+    <div class="spacer"></div>
+    <button class="btn ghost" onclick="toggleHelp()">? Mode d'emploi</button>
+  </div>
+
+  <main class="content">
+    <div class="topgrid">
+      <aside>
+        <div class="card setup">
+          <h2>1. La séquence</h2>
+          <div class="field"><label>Titre de l'activité</label><input id="sequenceTitle" type="text" placeholder="Ex. Je me prépare pour l'école" oninput="syncSetup();updatePreview();autoSaveDraft()"></div>
+          <div class="field"><label>Nom et prénom de l'enfant <span class="subtle">(facultatif)</span></label><input id="childName" type="text" placeholder="Nom et prénom" oninput="syncSetup();updatePreview();autoSaveDraft()"></div>
+
+          <label>Format à imprimer</label>
+          <div class="segment" id="layoutSegment">
+            <button class="segbtn active" data-layout="vertical" onclick="setLayout('vertical')">Fiche verticale</button>
+            <button class="segbtn" data-layout="horizontal" onclick="setLayout('horizontal')">Bande horizontale</button>
+            <button class="segbtn" data-layout="cards" onclick="setLayout('cards')">Cartes à découper</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="toggle-row"><div><strong>Numéroter les étapes</strong><div class="subtle">1, 2, 3…</div></div><input class="toggle" id="showNumbers" type="checkbox" checked onchange="syncSetup();updatePreview();autoSaveDraft()"></div>
+            <div class="toggle-row"><div><strong>Afficher le texte</strong><div class="subtle">Permet une séquence image seule si décoché.</div></div><input class="toggle" id="showText" type="checkbox" checked onchange="syncSetup();updatePreview();autoSaveDraft()"></div>
+            <div class="toggle-row"><div><strong>Cases à cocher</strong><div class="subtle">Pour marquer les étapes réalisées.</div></div><input class="toggle" id="showChecks" type="checkbox" checked onchange="syncSetup();updatePreview();autoSaveDraft()"></div>
+            <div class="toggle-row"><div><strong>Ajouter « Terminé »</strong><div class="subtle">Dernière case de la séquence.</div></div><input class="toggle" id="showDone" type="checkbox" checked onchange="syncSetup();updatePreview();autoSaveDraft()"></div>
+          </div>
+
+          <div class="info warn" style="margin-top:12px"><strong>Repère :</strong> ne pas découper plus finement que nécessaire. Pour certains enfants, 3 étapes sont plus accessibles que 8.</div>
+        </div>
+
+        <div class="card saved">
+          <h3>Séquences enregistrées</h3>
+          <div id="savedList" class="saved-list"></div>
+          <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn ghost small" onclick="exportJSON()">Exporter JSON</button>
+            <button class="btn ghost small" onclick="document.getElementById('importJson').click()">Importer JSON</button>
+            <input id="importJson" type="file" accept="application/json,.json" class="hidden" onchange="importJSON(event)">
+          </div>
+        </div>
+      </aside>
+
+      <section>
+        <div id="help" class="card help hidden">
+          <h2>Mode d'emploi</h2>
+          <p>Une séquence visuelle décompose une activité en étapes. Elle peut soutenir la compréhension, la mémorisation de l'ordre des actions et l'autonomie.</p>
+          <h3>Créer une séquence</h3>
+          <ul>
+            <li>Partir de zéro ou charger un modèle prêt à l'emploi depuis la bibliothèque.</li><li>Donner un titre concret à l'activité.</li>
+            <li>Ajouter uniquement les étapes réellement utiles.</li>
+            <li>Choisir pour chaque étape : texte seul, pictogramme ARASAAC ou Mulberry, photo personnelle, ou partir d’un modèle déjà illustré avec des pictos.</li>
+            <li>Réorganiser les étapes par glisser-déposer ou avec les flèches.</li>
+            <li>Choisir le rendu : fiche verticale, bande horizontale ou cartes à découper.</li>
+          </ul>
+          <h3>Adapter le niveau de détail</h3>
+          <p>Le bon nombre d'étapes dépend de l'enfant et de la tâche. Une séquence trop détaillée peut devenir aussi difficile à traiter que l'activité elle-même.</p>
+          <h3>Choisir le support visuel</h3>
+          <p>Un pictogramme n'est pas automatiquement plus accessible qu'une photo ou qu'un mot écrit. Choisir le support réellement compris par l'enfant.</p>
+          <h3>Confidentialité</h3>
+          <p>Les séquences sont enregistrées dans ce navigateur. Leur conservation et leur transmission doivent respecter les règles de confidentialité et de sécurité de l'établissement ou du service.</p>
+        </div>
+
+        <div class="card editor">
+          <div class="editor-head">
+            <div>
+              <h2>2. Les étapes</h2>
+              <div class="subtle">Ajoute, illustre et réorganise les actions.</div>
+            </div>
+            <button class="btn primary" onclick="addStep()">+ Ajouter une étape</button>
+          </div>
+          <div class="quickbar">
+            <button class="btn secondary" onclick="openTemplateLibrary()">📚 Charger un modèle prêt à l'emploi</button>
+            <span class="subtle" style="align-self:center">Le modèle reste entièrement modifiable après chargement.</span>
+          </div>
+          <div id="editorArea" class="items"></div>
+        </div>
+
+        <div class="card preview-wrap">
+          <div class="preview-title">
+            <h2 id="previewHeading">Ma séquence</h2>
+            <div id="previewChild" class="child"></div>
+          </div>
+          <div id="previewArea"></div>
+          <div id="arasaacCredit" class="credit hidden">Pictogrammes : ARASAAC · Gouvernement d'Aragon · licence CC BY-NC-SA.</div>
+          <div id="mulberryCredit" class="credit hidden">Symboles : Mulberry Symbols · licence CC BY-SA.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="footer">Malek MENAD — Éducateur spécialisé — bibliothèque de modèles</div>
+</div>
+
+
+<div id="templateModal" class="template-modal no-print" onclick="if(event.target===this)closeTemplateLibrary()">
+  <div class="template-card">
+    <div class="template-head">
+      <div>
+        <h2>Bibliothèque de séquences</h2>
+        <div class="subtle">Choisis un modèle, puis adapte librement les étapes, le texte et les visuels aux besoins de l'enfant.</div>
+      </div>
+      <button class="btn ghost" onclick="closeTemplateLibrary()">Fermer</button>
+    </div>
+
+    <div class="template-section">
+      <h3>Hygiène et soins du quotidien</h3>
+      <div class="template-grid">
+        <button class="template-choice" onclick="loadTemplate('shower')"><strong>Je prends ma douche</strong><span>Se déshabiller, se laver, se rincer, se sécher…</span></button>
+        <button class="template-choice" onclick="loadTemplate('teeth')"><strong>Je me brosse les dents</strong><span>Brosse, dentifrice, brossage, rinçage, rangement.</span></button>
+        <button class="template-choice" onclick="loadTemplate('hands')"><strong>Je me lave les mains</strong><span>Mouiller, savon, frotter, rincer, sécher.</span></button>
+        <button class="template-choice" onclick="loadTemplate('toilet')"><strong>Je vais aux toilettes</strong><span>Étapes simples autour du passage aux toilettes.</span></button>
+      </div>
+    </div>
+
+    <div class="template-section">
+      <h3>Habillage et autonomie personnelle</h3>
+      <div class="template-grid">
+        <button class="template-choice" onclick="loadTemplate('dress')"><strong>Je m'habille</strong><span>Sous-vêtements, haut, bas, chaussettes, chaussures.</span></button>
+        <button class="template-choice" onclick="loadTemplate('undress')"><strong>Je me déshabille</strong><span>Retirer et ranger les vêtements étape par étape.</span></button>
+        <button class="template-choice" onclick="loadTemplate('coat')"><strong>Je mets mon manteau</strong><span>Manteau, fermeture, chaussures et départ.</span></button>
+      </div>
+    </div>
+
+    <div class="template-section">
+      <h3>École, départs et transitions</h3>
+      <div class="template-grid">
+        <button class="template-choice" onclick="loadTemplate('morning')"><strong>Je me prépare pour l'école</strong><span>Habillage, dents, chaussures, sac, départ.</span></button>
+        <button class="template-choice" onclick="loadTemplate('schoolbag')"><strong>Je prépare mon cartable</strong><span>Cahiers, trousse, agenda, gourde, fermeture du sac.</span></button>
+        <button class="template-choice" onclick="loadTemplate('leaveSchool')"><strong>Je pars à l'école</strong><span>Manteau, chaussures, sac, vérification, départ.</span></button>
+        <button class="template-choice" onclick="loadTemplate('backHome')"><strong>Je rentre de l'école</strong><span>Poser le sac, enlever les chaussures, se laver les mains…</span></button>
+        <button class="template-choice" onclick="loadTemplate('car')"><strong>Je monte en voiture</strong><span>Aller à la voiture, s'installer, ceinture, départ.</span></button>
+        <button class="template-choice" onclick="loadTemplate('playToMeal')"><strong>Je passe du jeu au repas</strong><span>Prévenir, terminer, ranger, se laver les mains, venir à table.</span></button>
+      </div>
+    </div>
+
+    <div class="template-section">
+      <h3>Vie quotidienne et vie collective</h3>
+      <div class="template-grid">
+        <button class="template-choice" onclick="loadTemplate('bedtime')"><strong>Je me prépare pour dormir</strong><span>Pyjama, dents, toilettes, histoire, coucher.</span></button>
+        <button class="template-choice" onclick="loadTemplate('room')"><strong>Je range ma chambre</strong><span>Vêtements, jeux, bureau, poubelle, vérification.</span></button>
+        <button class="template-choice" onclick="loadTemplate('table')"><strong>Je mets la table</strong><span>Assiettes, couverts, verres, serviettes.</span></button>
+        <button class="template-choice" onclick="loadTemplate('meal')"><strong>Je prends mon repas</strong><span>S'installer, manger, débarrasser, ranger.</span></button>
+        <button class="template-choice" onclick="loadTemplate('activity')"><strong>Je fais une activité</strong><span>Choisir, préparer, réaliser, terminer, ranger.</span></button>
+        <button class="template-choice" onclick="loadTemplate('outing')"><strong>Je me prépare pour une sortie</strong><span>Toilettes, manteau, chaussures, affaires, départ.</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="picModal" class="arasaac-modal no-print" onclick="if(event.target===this)closePicModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <input id="picSearch" type="text" placeholder="Rechercher un pictogramme…" onkeydown="if(event.key==='Enter')searchPics()">
+      <button class="btn primary" onclick="searchPics()">Rechercher</button>
+      <button class="btn ghost" onclick="closePicModal()">Fermer</button>
+    </div>
+    <div class="source-tabs" style="margin-top:10px">
+      <button class="source-btn active" data-source="both" onclick="setPicSource('both')">ARASAAC + Mulberry</button>
+      <button class="source-btn" data-source="arasaac" onclick="setPicSource('arasaac')">ARASAAC</button>
+      <button class="source-btn" data-source="mulberry" onclick="setPicSource('mulberry')">Mulberry</button>
+    </div>
+    <div id="picSourceNote" class="subtle" style="margin-top:7px">Recherche dans les deux banques. Une connexion Internet est nécessaire.</div>
+    <div id="picResults" class="results"></div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const STORE='sequences_visuelles_mm_v1';
+const DRAFT='sequences_visuelles_mm_draft_v1';
+const MULBERRY_CACHE='mulberry_symbol_index_mm_v1';
+let sequences=loadSequences();
+let current={id:null,title:'',child:'',layout:'vertical',showNumbers:true,showText:true,showChecks:true,showDone:true,items:[]};
+let picTarget=null,picSource='both',picResultsCache=[],mulberryIndex=null,draggedId=null;
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function loadSequences(){try{return JSON.parse(localStorage.getItem(STORE)||'[]')}catch(e){return[]}}
+function persist(){localStorage.setItem(STORE,JSON.stringify(sequences))}
+function syncSetup(){
+  current.title=document.getElementById('sequenceTitle').value;
+  current.child=document.getElementById('childName').value;
+  current.showNumbers=document.getElementById('showNumbers').checked;
+  current.showText=document.getElementById('showText').checked;
+  current.showChecks=document.getElementById('showChecks').checked;
+  current.showDone=document.getElementById('showDone').checked;
+}
+function pushSetup(){
+  document.getElementById('sequenceTitle').value=current.title||'';
+  document.getElementById('childName').value=current.child||'';
+  document.getElementById('showNumbers').checked=current.showNumbers!==false;
+  document.getElementById('showText').checked=current.showText!==false;
+  document.getElementById('showChecks').checked=current.showChecks!==false;
+  document.getElementById('showDone').checked=current.showDone!==false;
+  setLayout(current.layout||'vertical');
+}
+function setLayout(layout){
+  current.layout=layout;
+  document.querySelectorAll('.segbtn').forEach(b=>b.classList.toggle('active',b.dataset.layout===layout));
+  updatePreview();autoSaveDraft();
+}
+function newSequence(){
+  current={id:null,title:'',child:'',layout:'vertical',showNumbers:true,showText:true,showChecks:true,showDone:true,items:[]};
+  pushSetup();renderEditor();updatePreview();localStorage.removeItem(DRAFT);toast('Nouvelle séquence');
+}
+function duplicateSequence(){
+  syncSetup();
+  current={...JSON.parse(JSON.stringify(current)),id:null,title:(current.title||'Séquence')+' — copie'};
+  pushSetup();renderEditor();updatePreview();toast('Séquence dupliquée');
+}
+function saveSequence(){
+  syncSetup();
+  if(!current.title.trim()){toast("Indique le titre de l'activité.");return}
+  if(!current.items.length){toast("Ajoute au moins une étape.");return}
+  if(!current.id)current.id=uid();
+  current.updated=new Date().toISOString();
+  const i=sequences.findIndex(s=>s.id===current.id);
+  if(i>=0)sequences[i]=JSON.parse(JSON.stringify(current));else sequences.unshift(JSON.parse(JSON.stringify(current)));
+  persist();renderSaved();localStorage.removeItem(DRAFT);toast('Séquence enregistrée');
+}
+function loadSequence(id){
+  const s=sequences.find(x=>x.id===id);if(!s)return;
+  current=JSON.parse(JSON.stringify(s));pushSetup();renderEditor();updatePreview();toast('Séquence chargée');
+}
+function deleteSequence(id,e){
+  e.stopPropagation();if(!confirm('Supprimer cette séquence enregistrée ?'))return;
+  sequences=sequences.filter(x=>x.id!==id);persist();renderSaved();
+}
+function renderSaved(){
+  const el=document.getElementById('savedList');
+  if(!sequences.length){el.innerHTML='<div class="subtle">Aucune séquence enregistrée.</div>';return}
+  el.innerHTML=sequences.map(s=>`<div class="saved-item"><div class="saved-main" onclick="loadSequence('${s.id}')"><div class="saved-title">${esc(s.title||'Sans titre')}</div><div class="saved-meta">${s.items?.length||0} étape(s) · ${s.layout==='horizontal'?'Bande horizontale':s.layout==='cards'?'Cartes':'Fiche verticale'}</div></div><button class="btn ghost small" onclick="deleteSequence('${s.id}',event)">✕</button></div>`).join('');
+}
+function addStep(label=''){
+  current.items.push({id:uid(),label,visual:null,checked:false});
+  renderEditor();updatePreview();autoSaveDraft();
+}
+function removeStep(id){current.items=current.items.filter(x=>x.id!==id);renderEditor();updatePreview();autoSaveDraft()}
+function moveStep(id,dir){
+  const i=current.items.findIndex(x=>x.id===id),j=i+dir;if(i<0||j<0||j>=current.items.length)return;
+  [current.items[i],current.items[j]]=[current.items[j],current.items[i]];
+  renderEditor();updatePreview();autoSaveDraft();
+}
+function updateStep(id,key,val){
+  const item=current.items.find(x=>x.id===id);if(!item)return;item[key]=val;updatePreview();autoSaveDraft();
+}
+function stepHTML(item,index){
+  const pic=item.visual?.url;
+  return `<div class="step" draggable="true" data-id="${item.id}" ondragstart="dragStart(event,'${item.id}')" ondragover="dragOver(event)" ondrop="dropStep(event,'${item.id}')" ondragend="dragEnd(event)">
+    <div class="draghandle" title="Glisser-déposer">☰</div>
+    <div class="stepnum">${index+1}</div>
+    <div class="step-main">
+      <div class="step-title">${pic?`<img class="visual-thumb show" src="${esc(pic)}" alt="">`:''}<input type="text" value="${esc(item.label||'')}" placeholder="Ex. Je mets mes chaussures" oninput="updateStep('${item.id}','label',this.value)"></div>
+      <div class="step-tools">
+        <button class="btn ghost small" onclick="openPicModal('${item.id}')">Choisir un pictogramme</button>
+        <label class="btn ghost small" style="cursor:pointer">Photo<input type="file" accept="image/*" class="hidden" onchange="setPhoto('${item.id}',this.files[0])"></label>
+        ${item.visual?`<button class="btn ghost small" onclick="clearVisual('${item.id}')">Retirer l'image</button>`:''}
+      </div>
+    </div>
+    <div class="step-side">
+      <div class="move"><button class="btn ghost small" onclick="moveStep('${item.id}',-1)">↑</button><button class="btn ghost small" onclick="moveStep('${item.id}',1)">↓</button></div>
+      <button class="btn danger small" onclick="removeStep('${item.id}')">✕</button>
+    </div>
+  </div>`;
+}
+function renderEditor(){
+  const el=document.getElementById('editorArea');
+  el.innerHTML=current.items.length?current.items.map(stepHTML).join(''):'<div class="subtle" style="text-align:center;padding:24px">Ajoute les étapes utiles de l’activité.</div>';
+}
+function dragStart(ev,id){draggedId=id;ev.currentTarget.classList.add('dragging');ev.dataTransfer.effectAllowed='move'}
+function dragOver(ev){ev.preventDefault();ev.dataTransfer.dropEffect='move'}
+function dropStep(ev,targetId){
+  ev.preventDefault();if(!draggedId||draggedId===targetId)return;
+  const from=current.items.findIndex(x=>x.id===draggedId),to=current.items.findIndex(x=>x.id===targetId);if(from<0||to<0)return;
+  const [moved]=current.items.splice(from,1);current.items.splice(to,0,moved);
+  renderEditor();updatePreview();autoSaveDraft();
+}
+function dragEnd(ev){ev.currentTarget.classList.remove('dragging');draggedId=null}
+function toggleCheck(id){
+  const item=current.items.find(x=>x.id===id);if(!item)return;item.checked=!item.checked;updatePreview();autoSaveDraft();
+}
+function updatePreview(){
+  syncSetup();
+  document.getElementById('previewHeading').textContent=current.title||'Ma séquence';
+  document.getElementById('previewChild').textContent=current.child?current.child:'';
+  const area=document.getElementById('previewArea');
+  const cls='sequence '+current.layout;
+  if(!current.items.length){area.innerHTML='<div class="subtle" style="text-align:center;padding:28px">La séquence apparaîtra ici.</div>'}
+  else{
+    let html=`<div class="${cls}">`;
+    current.items.forEach((x,i)=>{
+      html+=`<div class="seq-card">
+        ${current.showNumbers?`<div class="seq-num">${i+1}</div>`:''}
+        ${x.visual?.url?`<img class="seq-pic" src="${esc(x.visual.url)}" alt="">`:`<div class="seq-pic placeholder">•</div>`}
+        <div>
+          ${current.showText?`<div class="seq-label">${esc(x.label||'Étape')}</div>`:''}
+          ${current.showChecks?`<div class="check-box ${x.checked?'checked':''}" onclick="toggleCheck('${x.id}')" title="Marquer l'étape réalisée">${x.checked?'✓':''}</div>`:''}
+        </div>
+      </div>`;
+    });
+    if(current.showDone)html+='<div class="complete-card">✓ Terminé</div>';
+    html+='</div>';area.innerHTML=html;
+  }
+  const hasA=current.items.some(x=>x.visual?.type==='arasaac'),hasM=current.items.some(x=>x.visual?.type==='mulberry');
+  document.getElementById('arasaacCredit').classList.toggle('hidden',!hasA);
+  document.getElementById('mulberryCredit').classList.toggle('hidden',!hasM);
+  document.body.classList.toggle('print-horizontal',current.layout==='horizontal');
+  document.documentElement.style.setProperty('--print-cols',Math.max(2,Math.min(7,current.items.length+(current.showDone?1:0))));
+}
+
+function createBuiltInPicto(emoji,bg='#F3ECFB'){
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+    <rect x="8" y="8" width="240" height="240" rx="34" fill="${bg}"/>
+    <text x="128" y="146" text-anchor="middle" font-size="108" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif">${emoji}</text>
+  </svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+}
+function builtInVisual(emoji,bg){
+  return {type:'builtin', id:emoji, label:emoji, url:createBuiltInPicto(emoji,bg)};
+}
+
+function openTemplateLibrary(){
+  document.getElementById('templateModal').classList.add('show');
+}
+function closeTemplateLibrary(){
+  document.getElementById('templateModal').classList.remove('show');
+}
+function loadTemplate(type){
+  const templates={
+    shower:{
+      title:"Je prends ma douche",
+      items:[
+        {label:"Je me déshabille", visual:builtInVisual("👕","#EAF3FB")},
+        {label:"Je prépare ma serviette", visual:builtInVisual("🧺","#FFF4E6")},
+        {label:"J'ouvre l'eau", visual:builtInVisual("🚿","#EAF3FB")},
+        {label:"Je me mouille", visual:builtInVisual("💧","#EAF3FB")},
+        {label:"Je me savonne", visual:builtInVisual("🧼","#EDF9F0")},
+        {label:"Je me rince", visual:builtInVisual("🚿","#EAF3FB")},
+        {label:"Je coupe l'eau", visual:builtInVisual("🚰","#EAF3FB")},
+        {label:"Je me sèche", visual:builtInVisual("🛁","#FFF4E6")},
+        {label:"Je m'habille", visual:builtInVisual("👖","#F3ECFB")}
+      ]
+    },
+    teeth:{
+      title:"Je me brosse les dents",
+      items:[
+        {label:"Je prends ma brosse à dents", visual:builtInVisual("🪥","#EAF3FB")},
+        {label:"Je mets le dentifrice", visual:builtInVisual("🦷","#F3ECFB")},
+        {label:"Je brosse les dents du haut", visual:builtInVisual("🪥","#EAF3FB")},
+        {label:"Je brosse les dents du bas", visual:builtInVisual("🪥","#EAF3FB")},
+        {label:"Je rince ma bouche", visual:builtInVisual("💧","#EAF3FB")},
+        {label:"Je rince ma brosse", visual:builtInVisual("🚰","#EAF3FB")},
+        {label:"Je range ma brosse à dents", visual:builtInVisual("🪥","#EAF3FB")}
+      ]
+    },
+    hands:{
+      title:"Je me lave les mains",
+      items:[
+        {label:"Je mouille mes mains", visual:builtInVisual("💧","#EAF3FB")},
+        {label:"Je prends du savon", visual:builtInVisual("🧼","#EDF9F0")},
+        {label:"Je frotte mes mains", visual:builtInVisual("👐","#EDF9F0")},
+        {label:"Je rince mes mains", visual:builtInVisual("🚰","#EAF3FB")},
+        {label:"Je sèche mes mains", visual:builtInVisual("🧻","#FFF4E6")}
+      ]
+    },
+    toilet:{
+      title:"Je vais aux toilettes",
+      items:[
+        {label:"Je vais aux toilettes", visual:builtInVisual("🚽","#EAF3FB")},
+        {label:"Je baisse mes vêtements", visual:builtInVisual("👖","#F3ECFB")},
+        {label:"J'utilise les toilettes", visual:builtInVisual("🚽","#EAF3FB")},
+        {label:"Je m'essuie", visual:builtInVisual("🧻","#FFF4E6")},
+        {label:"Je remonte mes vêtements", visual:builtInVisual("👕","#F3ECFB")},
+        {label:"Je tire la chasse", visual:builtInVisual("💧","#EAF3FB")},
+        {label:"Je me lave les mains", visual:builtInVisual("🧼","#EDF9F0")}
+      ]
+    },
+    dress:{
+      title:"Je m'habille",
+      items:[
+        {label:"Je mets mes sous-vêtements", visual:builtInVisual("🩲","#F3ECFB")},
+        {label:"Je mets mon haut", visual:builtInVisual("👕","#F3ECFB")},
+        {label:"Je mets mon pantalon", visual:builtInVisual("👖","#F3ECFB")},
+        {label:"Je mets mes chaussettes", visual:builtInVisual("🧦","#FFF4E6")},
+        {label:"Je mets mes chaussures", visual:builtInVisual("👟","#FFF4E6")}
+      ]
+    },
+    undress:{
+      title:"Je me déshabille",
+      items:[
+        {label:"J'enlève mes chaussures", visual:builtInVisual("👟","#FFF4E6")},
+        {label:"J'enlève mon pantalon", visual:builtInVisual("👖","#F3ECFB")},
+        {label:"J'enlève mon haut", visual:builtInVisual("👕","#F3ECFB")},
+        {label:"J'enlève mes sous-vêtements", visual:builtInVisual("🩲","#F3ECFB")},
+        {label:"Je mets mes vêtements à l'endroit prévu", visual:builtInVisual("🧺","#FFF4E6")}
+      ]
+    },
+    coat:{
+      title:"Je mets mon manteau",
+      items:[
+        {label:"Je prends mon manteau", visual:builtInVisual("🧥","#F3ECFB")},
+        {label:"Je passe un bras", visual:builtInVisual("🙋","#EAF3FB")},
+        {label:"Je passe l'autre bras", visual:builtInVisual("🙋","#EAF3FB")},
+        {label:"Je ferme mon manteau", visual:builtInVisual("🧥","#F3ECFB")},
+        {label:"Je suis prêt", visual:builtInVisual("✅","#EDF9F0")}
+      ]
+    },
+    morning:{
+      title:"Je me prépare pour l'école",
+      items:[
+        {label:"Je m'habille", visual:builtInVisual("👕","#F3ECFB")},
+        {label:"Je me brosse les dents", visual:builtInVisual("🪥","#EAF3FB")},
+        {label:"Je mets mes chaussures", visual:builtInVisual("👟","#FFF4E6")},
+        {label:"Je prends mon manteau", visual:builtInVisual("🧥","#F3ECFB")},
+        {label:"Je prends mon sac", visual:builtInVisual("🎒","#FFF4E6")},
+        {label:"Je pars", visual:builtInVisual("🚶","#EDF9F0")}
+      ]
+    },
+    schoolbag:{
+      title:"Je prépare mon cartable",
+      items:[
+        {label:"Je regarde ce qu'il me faut", visual:builtInVisual("📋","#EAF3FB")},
+        {label:"Je mets mes cahiers dans le sac", visual:builtInVisual("📚","#FFF4E6")},
+        {label:"Je mets ma trousse", visual:builtInVisual("✏️","#FFF4E6")},
+        {label:"Je mets mon agenda", visual:builtInVisual("📘","#EAF3FB")},
+        {label:"Je mets ma gourde si besoin", visual:builtInVisual("🧴","#EAF3FB")},
+        {label:"Je ferme mon sac", visual:builtInVisual("🎒","#FFF4E6")}
+      ]
+    },
+    leaveSchool:{
+      title:"Je pars à l'école",
+      items:[
+        {label:"Je mets mes chaussures", visual:builtInVisual("👟","#FFF4E6")},
+        {label:"Je mets mon manteau", visual:builtInVisual("🧥","#F3ECFB")},
+        {label:"Je prends mon sac", visual:builtInVisual("🎒","#FFF4E6")},
+        {label:"Je vérifie que j'ai mes affaires", visual:builtInVisual("📋","#EAF3FB")},
+        {label:"Je pars", visual:builtInVisual("🏫","#EAF3FB")}
+      ]
+    },
+    backHome:{
+      title:"Je rentre de l'école",
+      items:[
+        {label:"Je pose mon sac", visual:builtInVisual("🎒","#FFF4E6")},
+        {label:"J'enlève mon manteau", visual:builtInVisual("🧥","#F3ECFB")},
+        {label:"J'enlève mes chaussures", visual:builtInVisual("👟","#FFF4E6")},
+        {label:"Je range mes affaires", visual:builtInVisual("🧺","#FFF4E6")},
+        {label:"Je me lave les mains", visual:builtInVisual("🧼","#EDF9F0")},
+        {label:"Je regarde ce qui est prévu ensuite", visual:builtInVisual("📅","#EAF3FB")}
+      ]
+    },
+    car:{
+      title:"Je monte en voiture",
+      items:[
+        {label:"Je vais jusqu'à la voiture", visual:builtInVisual("🚗","#EAF3FB")},
+        {label:"J'ouvre la portière", visual:builtInVisual("🚪","#FFF4E6")},
+        {label:"Je m'installe à ma place", visual:builtInVisual("🪑","#FFF4E6")},
+        {label:"J'attache ma ceinture", visual:builtInVisual("🔒","#EDF9F0")},
+        {label:"Je ferme la portière", visual:builtInVisual("🚪","#FFF4E6")},
+        {label:"La voiture peut partir", visual:builtInVisual("🚗","#EAF3FB")}
+      ]
+    },
+    playToMeal:{
+      title:"Je passe du jeu au repas",
+      items:[
+        {label:"On me prévient que le jeu va bientôt finir", visual:builtInVisual("⏳","#FFF4E6")},
+        {label:"Je termine ce que je fais", visual:builtInVisual("🎲","#EAF3FB")},
+        {label:"Je range mon jeu", visual:builtInVisual("🧺","#FFF4E6")},
+        {label:"Je me lave les mains", visual:builtInVisual("🧼","#EDF9F0")},
+        {label:"Je vais à table", visual:builtInVisual("🍽️","#FFF4E6")}
+      ]
+    },
+    bedtime:{
+      title:"Je me prépare pour dormir",
+      items:[
+        {label:"Je mets mon pyjama", visual:builtInVisual("🛌","#F3ECFB")},
+        {label:"Je me brosse les dents", visual:builtInVisual("🪥","#EAF3FB")},
+        {label:"Je vais aux toilettes", visual:builtInVisual("🚽","#EAF3FB")},
+        {label:"Je prépare mes affaires pour la nuit", visual:builtInVisual("🌙","#EAF3FB")},
+        {label:"Je choisis une histoire ou un temps calme", visual:builtInVisual("📖","#FFF4E6")},
+        {label:"Je vais dans mon lit", visual:builtInVisual("🛏️","#F3ECFB")},
+        {label:"C'est l'heure de dormir", visual:builtInVisual("😴","#EDF9F0")}
+      ]
+    },
+    room:{
+      title:"Je range ma chambre",
+      items:[
+        {label:"Je ramasse les vêtements", visual:builtInVisual("👕","#F3ECFB")},
+        {label:"Je range les vêtements", visual:builtInVisual("🧺","#FFF4E6")},
+        {label:"Je range les jeux", visual:builtInVisual("🧸","#EAF3FB")},
+        {label:"Je range les livres et mes affaires", visual:builtInVisual("📚","#FFF4E6")},
+        {label:"Je jette ce qui doit aller à la poubelle", visual:builtInVisual("🗑️","#EDF9F0")},
+        {label:"Je vérifie ma chambre", visual:builtInVisual("✅","#EDF9F0")}
+      ]
+    },
+    table:{
+      title:"Je mets la table",
+      items:[
+        {label:"Je mets les assiettes", visual:builtInVisual("🍽️","#FFF4E6")},
+        {label:"Je mets les couverts", visual:builtInVisual("🍴","#FFF4E6")},
+        {label:"Je mets les verres", visual:builtInVisual("🥛","#EAF3FB")},
+        {label:"Je mets les serviettes", visual:builtInVisual("🧻","#FFF4E6")},
+        {label:"Je vérifie que la table est prête", visual:builtInVisual("✅","#EDF9F0")}
+      ]
+    },
+    meal:{
+      title:"Je prends mon repas",
+      items:[
+        {label:"Je me lave les mains", visual:builtInVisual("🧼","#EDF9F0")},
+        {label:"Je m'installe à table", visual:builtInVisual("🪑","#FFF4E6")},
+        {label:"Je prends mon repas", visual:builtInVisual("🍽️","#FFF4E6")},
+        {label:"Je débarrasse ce que je peux", visual:builtInVisual("🍽️","#FFF4E6")},
+        {label:"Je range ou je mets la vaisselle à l'endroit prévu", visual:builtInVisual("🧺","#FFF4E6")}
+      ]
+    },
+    activity:{
+      title:"Je fais une activité",
+      items:[
+        {label:"Je choisis ou je regarde l'activité prévue", visual:builtInVisual("📝","#EAF3FB")},
+        {label:"Je prépare le matériel", visual:builtInVisual("🧰","#FFF4E6")},
+        {label:"Je commence l'activité", visual:builtInVisual("▶️","#EDF9F0")},
+        {label:"Je réalise l'activité", visual:builtInVisual("🖍️","#EAF3FB")},
+        {label:"Je termine", visual:builtInVisual("✅","#EDF9F0")},
+        {label:"Je range le matériel", visual:builtInVisual("🧺","#FFF4E6")}
+      ]
+    },
+    outing:{
+      title:"Je me prépare pour une sortie",
+      items:[
+        {label:"Je vais aux toilettes si besoin", visual:builtInVisual("🚽","#EAF3FB")},
+        {label:"Je mets mes chaussures", visual:builtInVisual("👟","#FFF4E6")},
+        {label:"Je mets mon manteau si besoin", visual:builtInVisual("🧥","#F3ECFB")},
+        {label:"Je prends les affaires prévues", visual:builtInVisual("🎒","#FFF4E6")},
+        {label:"Je vérifie que je suis prêt", visual:builtInVisual("✅","#EDF9F0")},
+        {label:"Je pars", visual:builtInVisual("🚶","#EDF9F0")}
+      ]
+    }
+  };
+
+  const t=templates[type];
+  if(!t)return;
+
+  if(current.items.length && !confirm("Remplacer les étapes actuelles par ce modèle ?"))return;
+
+  current.title=t.title;
+  current.items=t.items.map(item=>({
+    id:uid(),
+    label:item.label,
+    visual:item.visual || null,
+    checked:false
+  }));
+  closeTemplateLibrary();
+  pushSetup();
+  renderEditor();
+  updatePreview();
+  autoSaveDraft();
+  toast("Modèle chargé : "+t.title);
+}
+function printSequence(){syncSetup();updatePreview();window.print()}
+function openPicModal(id){
+  picTarget=id;const item=current.items.find(x=>x.id===id);
+  document.getElementById('picSearch').value=item?.label||'';
+  document.getElementById('picResults').innerHTML='';
+  setPicSource(picSource||'both',false);
+  document.getElementById('picModal').classList.add('show');
+  setTimeout(()=>document.getElementById('picSearch').focus(),50);
+  if(item?.label)searchPics();
+}
+function closePicModal(){document.getElementById('picModal').classList.remove('show');picTarget=null;picResultsCache=[]}
+function setPicSource(src,rerun=true){
+  picSource=src;document.querySelectorAll('.source-btn').forEach(b=>b.classList.toggle('active',b.dataset.source===src));
+  const note=src==='arasaac'?'Recherche ARASAAC en français. Connexion Internet nécessaire.':src==='mulberry'?'Recherche Mulberry. Les noms sont surtout en anglais ; les termes français courants sont traduits automatiquement.':'Recherche dans les deux banques. Une connexion Internet est nécessaire.';
+  document.getElementById('picSourceNote').textContent=note;
+  if(rerun&&document.getElementById('picSearch').value.trim())searchPics();
+}
+function normText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,' ').replace(/[^a-z0-9]+/g,' ').trim()}
+const FR_MULBERRY={
+ 'ecole':['school','class','classroom'],'classe':['class','classroom'],'repas':['meal','eat','food'],'manger':['eat','food'],'boire':['drink'],'eau':['water'],
+ 'petit dejeuner':['breakfast'],'dejeuner':['lunch'],'diner':['dinner','meal'],'gouter':['snack','food'],'douche':['shower'],'bain':['bath'],'toilettes':['toilet'],
+ 'se laver':['wash'],'laver':['wash'],'mains':['hands','wash hands'],'laver les mains':['wash hands'],'s habiller':['dress','clothes'],'habiller':['dress','clothes'],
+ 'se deshabiller':['undress','clothes'],'chaussures':['shoes'],'mettre les chaussures':['shoes'],'sac':['bag'],'sac ecole':['school bag','bag'],
+ 'coucher':['bed','sleep'],'dormir':['sleep','bed'],'lit':['bed'],'ranger':['tidy','put away'],'rangement':['tidy'],'chambre':['bedroom','room'],
+ 'brosser les dents':['toothbrush','teeth'],'brosse a dents':['toothbrush'],'dentifrice':['toothpaste'],'dents':['teeth','toothbrush'],'rincer':['rinse','wash'],
+ 'serviette':['towel'],'secher':['dry','towel'],'savon':['soap'],'shampoing':['shampoo'],'ouvrir':['open'],'fermer':['close'],
+ 'maison':['home','house'],'voiture':['car'],'bus':['bus'],'transport':['transport','bus','car'],'partir':['go','leave'],'arriver':['arrive'],
+ 'jeu':['play','game'],'jouer':['play','game'],'pause':['break','rest'],'livre':['book'],'lire':['read','book'],'devoirs':['homework','study'],
+ 'table':['table'],'assiette':['plate'],'couvert':['cutlery'],'fourchette':['fork'],'cuillere':['spoon'],'verre':['glass','drink'],
+ 'maman':['mother','mum'],'papa':['father','dad'],'famille':['family'],'educateur':['support worker','carer','person']
+};
+function mulberryTerms(q){
+  const n=normText(q),out=new Set([n]);
+  Object.entries(FR_MULBERRY).forEach(([fr,en])=>{if(n===fr||n.includes(fr)||fr.includes(n))en.forEach(x=>out.add(normText(x)))});
+  n.split(' ').forEach(w=>{if(FR_MULBERRY[w])FR_MULBERRY[w].forEach(x=>out.add(normText(x)))});
+  return [...out].filter(Boolean);
+}
+async function loadMulberryIndex(){
+  if(mulberryIndex)return mulberryIndex;
+  try{
+    const cached=JSON.parse(localStorage.getItem(MULBERRY_CACHE)||'null');
+    if(cached&&Array.isArray(cached.paths)&&Date.now()-(cached.saved||0)<1000*60*60*24*30){
+      mulberryIndex=cached.paths.map(path=>({path,name:path.split('/').pop().replace(/\.svg$/i,'').replace(/_/g,' ')}));return mulberryIndex;
+    }
+  }catch(e){}
+  const r=await fetch('https://api.github.com/repos/mulberrysymbols/mulberry-symbols/git/trees/master?recursive=1',{headers:{'Accept':'application/vnd.github+json'}});
+  if(!r.ok)throw new Error('Mulberry index unavailable');
+  const d=await r.json(),paths=(d.tree||[]).filter(x=>x.type==='blob'&&/^EN\/[^/]+\.svg$/i.test(x.path)).map(x=>x.path);
+  mulberryIndex=paths.map(path=>({path,name:path.split('/').pop().replace(/\.svg$/i,'').replace(/_/g,' ')}));
+  try{localStorage.setItem(MULBERRY_CACHE,JSON.stringify({saved:Date.now(),paths}))}catch(e){}
+  return mulberryIndex;
+}
+async function searchArasaac(q,limit=18){
+  const r=await fetch('https://api.arasaac.org/v1/pictograms/fr/search/'+encodeURIComponent(q));
+  if(!r.ok)throw new Error('ARASAAC unavailable');
+  const d=await r.json();
+  return d.slice(0,limit).map(p=>{const id=p._id||p.id,label=(p.keywords&&p.keywords[0]&&(p.keywords[0].keyword||p.keywords[0].meaning))||q;return{source:'arasaac',id,label,url:`https://static.arasaac.org/pictograms/${id}/${id}_500.png`}});
+}
+async function searchMulberry(q,limit=18){
+  const index=await loadMulberryIndex(),terms=mulberryTerms(q);
+  const scored=index.map(x=>{
+    const name=normText(x.name);let score=0;
+    for(const t of terms){if(!t)continue;if(name===t)score=Math.max(score,100);else if(name.startsWith(t+' ')||name.startsWith(t))score=Math.max(score,70);else if(name.includes(t))score=Math.max(score,45);else{const parts=t.split(' ').filter(Boolean);if(parts.length>1&&parts.every(p=>name.includes(p)))score=Math.max(score,35)}}
+    return{x,score};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.x.name.localeCompare(b.x.name)).slice(0,limit);
+  return scored.map(({x})=>{const encoded=x.path.split('/').map(encodeURIComponent).join('/');return{source:'mulberry',id:x.path,label:x.name,url:`https://raw.githubusercontent.com/mulberrysymbols/mulberry-symbols/master/${encoded}`}});
+}
+function renderPicResults(groups){
+  const el=document.getElementById('picResults');picResultsCache=[];let html='';
+  for(const group of groups){
+    if(!group.items.length)continue;
+    html+=`<div class="results-heading">${esc(group.title)} · ${group.items.length} résultat${group.items.length>1?'s':''}</div>`;
+    for(const p of group.items){const idx=picResultsCache.push(p)-1;html+=`<button class="pic-result" onclick="choosePicResult(${idx})"><img src="${esc(p.url)}" alt="${esc(p.label)}" loading="lazy"><span>${esc(p.label)}</span><span class="source-badge">${p.source==='arasaac'?'ARASAAC':'Mulberry'}</span></button>`}
+  }
+  el.innerHTML=html||'<div class="loading">Aucun pictogramme trouvé. Essaie un autre mot ou une autre banque.</div>';
+}
+async function searchPics(){
+  const q=document.getElementById('picSearch').value.trim(),el=document.getElementById('picResults');
+  if(!q){el.innerHTML='<div class="loading">Saisir un mot à rechercher.</div>';return}
+  el.innerHTML='<div class="loading">Recherche…</div>';
+  try{
+    if(picSource==='arasaac'){renderPicResults([{title:'ARASAAC',items:await searchArasaac(q,24)}]);return}
+    if(picSource==='mulberry'){renderPicResults([{title:'Mulberry',items:await searchMulberry(q,24)}]);return}
+    const [a,m]=await Promise.allSettled([searchArasaac(q,14),searchMulberry(q,14)]),groups=[];
+    if(a.status==='fulfilled')groups.push({title:'ARASAAC',items:a.value});
+    if(m.status==='fulfilled')groups.push({title:'Mulberry',items:m.value});
+    if(!groups.length)throw new Error();
+    renderPicResults(groups);if(a.status==='rejected'||m.status==='rejected')toast('Une des deux banques est momentanément indisponible.');
+  }catch(e){el.innerHTML='<div class="loading">Recherche indisponible. Vérifie la connexion Internet ou essaie l’autre banque.</div>'}
+}
+function choosePicResult(index){
+  const p=picResultsCache[index],item=current.items.find(x=>x.id===picTarget);if(!p||!item)return;
+  item.visual={type:p.source,id:p.id,label:p.label,url:p.url};closePicModal();renderEditor();updatePreview();autoSaveDraft();
+}
+function clearVisual(id){const item=current.items.find(x=>x.id===id);if(item)item.visual=null;renderEditor();updatePreview();autoSaveDraft()}
+function setPhoto(id,file){
+  if(!file)return;const r=new FileReader();
+  r.onload=()=>{const img=new Image();img.onload=()=>{const max=500;let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);const item=current.items.find(x=>x.id===id);if(item)item.visual={type:'photo',url:c.toDataURL('image/jpeg',.8)};renderEditor();updatePreview();autoSaveDraft()};img.src=r.result};r.readAsDataURL(file);
+}
+let draftTimer;
+function autoSaveDraft(){clearTimeout(draftTimer);draftTimer=setTimeout(()=>{syncSetup();try{localStorage.setItem(DRAFT,JSON.stringify(current))}catch(e){}},300)}
+function loadDraft(){try{const d=JSON.parse(localStorage.getItem(DRAFT)||'null');if(d&&confirm('Une séquence non enregistrée a été retrouvée. La restaurer ?'))current=d}catch(e){}}
+function exportJSON(){const blob=new Blob([JSON.stringify(sequences,null,2)],{type:'application/json'});download(blob,'sequences_visuelles_sauvegarde.json')}
+function importJSON(ev){
+  const f=ev.target.files?.[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d))throw new Error();if(!confirm('Importer cette sauvegarde remplacera les séquences enregistrées sur ce navigateur. Continuer ?'))return;sequences=d;persist();renderSaved();toast('Sauvegarde importée')}catch(e){alert('Fichier JSON non reconnu.')}};r.readAsText(f);ev.target.value='';
+}
+function download(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function toggleHelp(){document.getElementById('help').classList.toggle('hidden')}
+function init(){loadDraft();pushSetup();renderSaved();renderEditor();updatePreview()}
+init();
+</script>
+</body>
+</html>
