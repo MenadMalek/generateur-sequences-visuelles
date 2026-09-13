@@ -1,6 +1,6 @@
 # Générateur de séquences visuelles
 
-Outil web gratuit permettant de décomposer une activité en étapes simples et visuelles afin de soutenir la compréhension et l’autonomie de l’enfant.
+Outil web permettant de décomposer une activité en étapes simples et visuelles afin de soutenir la compréhension et l’autonomie de l’enfant.
 
 ## Fonctions principales
 
@@ -29,7 +29,7 @@ Un pictogramme n’est pas automatiquement plus accessible qu’une photo ou qu�
 
 Les séquences enregistrées sont conservées localement dans le navigateur. Elles ne sont pas envoyées vers GitHub.
 
-Pour un usage professionnel, la conservation et la transmission des données doivent respecter les règles de confidentialité et de sécurité de l’établissement ou du service.
+Pour un usage professionnel autorisé, la conservation et la transmission des données doivent respecter les règles de confidentialité et de sécurité de l’établissement ou du service.
 
 ## Ressources visuelles
 
@@ -38,6 +38,16 @@ L’outil permet de rechercher des pictogrammes dans :
 - **Mulberry Symbols**
 
 Les modèles prêts à l’emploi contiennent également des illustrations intégrées qui peuvent être remplacées librement par l’utilisateur.
+
+## Conditions d’utilisation
+
+**© 2026 Malek MENAD — Tous droits réservés.**
+
+La consultation, la découverte, la démonstration et l’usage strictement personnel sont gratuits. Toute utilisation professionnelle ou institutionnelle nécessite l’autorisation préalable de Malek MENAD.
+
+Sans autorisation écrite préalable, l’intégration dans une autre application ou plateforme, la modification pour diffusion, la redistribution, le réhébergement, la revente et l’exploitation commerciale sont interdits.
+
+Le caractère public du dépôt ne constitue pas une autorisation générale de réutilisation du code. Voir [`LICENSE.txt`](LICENSE.txt).
 
 ## Auteur
 
